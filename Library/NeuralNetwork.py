@@ -41,16 +41,8 @@ class Neural_Network (metaclass=AbstractClass):
 
 	def __init__(
         self
-		, input_dim : np.uint # Length of an individual input vector
-		, output_dim : np.uint # Lenght of an individual output vector
 		):
 		"""Construct a neural network"""
-
-        # Node count of input layer
-		self.input_dim = input_dim
-		# Node count of output layer
-		self.output_size = output_dim
-		# Neural network layer sequence
 		self.layers = typing.List[Neural_Layer]
 
 	@AbstractMethod	
@@ -70,7 +62,7 @@ class Neural_Network (metaclass=AbstractClass):
 		pass
 
 	@AbstractMethod
-	def Backpropagate(
+	def __Backpropagate(
 		self
 		, inputs : np.ndarray # Matrix, with each row representing an input vector
 		, outputs : np.ndarray # Matrix, with each row representing an output vector
@@ -80,7 +72,7 @@ class Neural_Network (metaclass=AbstractClass):
 		pass
 
 	@AbstractMethod
-	def Compute_Error(
+	def __Compute_Error(
 		computed_outputs : np.ndarray # Matrix, with each row representing an input vector
 		, expected_outputs : np.ndarray # Matrix, with each row representing an output vector
 		) -> np.float64: # Computed cost over all input-output pairs
