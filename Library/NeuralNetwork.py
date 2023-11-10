@@ -29,8 +29,8 @@ class Neural_Layer (metaclass=AbstractClass):
 	@AbstractMethod
 	def Predict(
 		self
-		, layer_input : np.ndarray # Vector values aligned with this layer's input dimension
-	) -> np.ndarray: # Predicted output vector
+		, layer_input : np.ndarray # Matrix, with each row representing an input vector
+	) -> np.ndarray: # Matrix, with each row representing an output vector
 		"""Compute an individual output based on an individual input"""
 		pass
 

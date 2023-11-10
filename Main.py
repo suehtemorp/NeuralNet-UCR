@@ -33,11 +33,13 @@ xor_network.Add_Layer(output_layer)
 X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
 y = np.array([[0], [1], [1], [0]])
 
+print(f"Shape of X {X.shape}")
+
 
 # Train the network
 final_error = xor_network.Train(X, y, learning_rate=0.1, epochs=1, epoch_report_rate=10)
 
-predictions = xor_network.Evaluate(X)
+predictions = xor_network.Predict(X)
 binary_predictions = np.round(predictions)
 print("Predictions after training:")
 print(predictions)
