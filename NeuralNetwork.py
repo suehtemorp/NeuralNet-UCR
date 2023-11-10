@@ -1,4 +1,4 @@
-# import libaryName.Models
+# Numpy numericals
 import numpy as np
 
 # Type hints
@@ -13,31 +13,26 @@ class Neural_Layer (metaclass=AbstractClass):
 
 	def __init__(
         self
-        , output_dim : np.uint
-        , input_dim: np.uint
-        , activation_function :  typing.Callable[[float], float]
-        , weights : typing.List[typing.List[float]]
-        , biases : typing.List[float]):
+        , output_dim : np.uint # Length of output vector
+        , input_dim: np.uint # Length of input vector
+        , activation_function :  typing.Callable[[float], float] # Activation function
+		):
 		"""Construct a neural network layer"""
-
 		# Node count of nodes inside layer
 		self.output_dim : np.uint = output_dim
         # Node count of nodes on input layer
 		self.input_dim : np.uint = input_dim
 		# Activation function
 		self.activation_function : np.uint = activation_function
-		# Weight matrix for weighted sums
-		self.weights = np.zeros(shape=(output_dim, input_dim), dtype=np.float64)
-		# Bias vector for weighted sums
-		self.biases : typing.List[float] = biases
 		# Output values stored inside layer
 		self.output = np.zeros(shape=(output_dim, 1), dtype=np.float64)
 
 	@AbstractMethod
 	def Predict(
 		self
-		, layer_input) -> np.ndarray:
-		"""Compute the output based on an input layer and the ouput size"""
+		, layer_input : "Neural_Layer" # Other layer with length of this layer's input dimension
+		) -> np.ndarray: # Predicted output vector
+		"""Compute an individual output based on an individual input"""
 		pass
 
 # Base definition for a neural network
@@ -46,8 +41,9 @@ class Neural_Network (metaclass=AbstractClass):
 
 	def __init__(
         self
-		, input_dim : np.uint
-		, output_dim : np.uint):
+		, input_dim : np.uint # Length of an individual input vector
+		, output_dim : np.uint # Lenght of an individual output vector
+		):
 		"""Construct a neural network"""
 
         # Node count of input layer
@@ -57,47 +53,52 @@ class Neural_Network (metaclass=AbstractClass):
 		# Neural network layer sequence
 		self.layers = typing.List[Neural_Layer]
 
-	# Base class
 	@AbstractMethod	
 	def Add_Layer(
 		self
-		, next_layer : Neural_Layer
-		, activation_function)  -> bool:
+		, next_layer : Neural_Layer # Neural layer to add
+		)  -> bool: # Whether or not the layer was added succesfully
 		"""Add a neuron layer to the sequence of layers already stored on the network"""
 		pass
-
 
 	@AbstractMethod
 	def Feed_Forward(
 		self
-		, inputs : np.ndarray) -> np.ndarray:
+		, inputs : np.ndarray # Matrix, with each row representing an input vector
+		) -> np.ndarray: # Matrix, with each row representing an output vector
 		"""Feed a set of inputs through the network, and get a set of predictions based on those"""
 		pass
 
 	@AbstractMethod
 	def Backpropagate(
 		self
-		, inputs : np.ndarray
-		, outputs : np.ndarray
-		, learning_rate : np.float64) -> None:
+		, inputs : np.ndarray # Matrix, with each row representing an input vector
+		, outputs : np.ndarray # Matrix, with each row representing an output vector
+		, learning_rate : np.float64 # Learning rate. Bigger values mean higher rate
+		) -> None:
 		"""Readjust weights based on a subset of inputs, and the corresponding outputs """
 		pass
 
 	@AbstractMethod
 	def Compute_Error(
-		computed_outputs : np.ndarray
-		, expected_outputs : np.ndarray) -> np.float64:
+		computed_outputs : np.ndarray # Matrix, with each row representing an input vector
+		, expected_outputs : np.ndarray # Matrix, with each row representing an output vector
+		) -> np.float64: # Computed cost over all input-output pairs
 		"""Compute the cost function based on the set of outputs and the expected outputs"""
 		pass
 
 	def Train(
 		self
-		, inputs : np.ndarray
-		, outputs : np.ndarray
-		, learning_rate : np.float64
-		, epochs : np.uint64
-		, epoch_report_rate : np.uint = 1) -> np.float64:
+		, inputs : np.ndarray # Matrix, with each row representing an input vector
+		, outputs : np.ndarray # Matrix, with each row representing an output vector
+		, learning_rate : np.float64 # Learning rate. Bigger values mean higher rate
+		, epochs : np.uint64 # Iteration count for training backpropagation cycles
+		, epoch_report_rate : np.uint = 1 # How many epochs until next error report
+		) -> np.float64: # Computed cost over all input-output pairs, after training
 		"""Train the Neural Network, and get the final error after the last epoch"""
+
+		# This naive implementation trains the network on all input-output pairs at once
+		# We should consider estochastic training instead for perfomance
 		for epoch in range(epochs):
 
 			computed_outputs : np.ndarray = self.Feed_Forward(inputs=input)
