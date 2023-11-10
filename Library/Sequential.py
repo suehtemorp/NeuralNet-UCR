@@ -52,23 +52,20 @@ class Sequential(Neural_Network):
 
 		# This naive implementation trains the network on all input-output pairs at once
 		# We should consider estochastic training instead for perfomance
+		
+		computed_outputs : np.ndarray = []
 		for epoch in range(epochs):
 			# Keep track of computed outputs
-			computed_outputs : np.ndarray = []
-
-			# Compute an individual output per input
-			for individual_input in inputs:
-				np.append(computed_outputs, self.Predict(inputs=individual_input[:, np.newaxis]))
-
+			computed_outputs = self.Predict(inputs=inputs)
+			
 			# Backpropagate the error through the network
-			self.Backpropagate(inputs=computed_outputs, outputs=outputs, learning_rate=learning_rate)
+			self.Backpropagate(outputs=outputs, learning_rate=learning_rate)
 
 			if epoch % epoch_report_rate == 0:
-				error = Sequential.Compute_Error(outputs=outputs, computed_outputs=computed_outputs)
+				error = Sequential.Compute_Error(expected_outputs=outputs, computed_outputs=computed_outputs)
 				print(f'Error after {epoch} epochs: {error}')
-		
-		# computed_outputs : np.ndarray = self.Feed_Forward(inputs=inputs)
-		return self.Compute_Error(outputs=outputs, computed_outputs=computed_outputs)
+
+		return Sequential.Compute_Error(expected_outputs=outputs, computed_outputs=computed_outputs)
 
 	def Predict(
 		self
@@ -85,27 +82,25 @@ class Sequential(Neural_Network):
 
 	def Backpropagate(self, inputs, outputs, learning_rate):
 		"""Readjust weights based on a subset of inputs and the corresponding outputs"""
-		# Initialize gradients for backpropagation
-		gradients = np.ones_like(outputs)
-		print(f"Gradients: {gradients.shape}", gradients)
-		# Iterate through layers in reverse order
-		for layer in reversed(self.layers):
-			print(f"Layer: {layer.output.shape}", layer.output)
-			gradients = gradients * layer.activation_function(layer.output, derivative=True)
-			print(f"Gradients: {gradients.shape}", gradients)
-			exit()
-			layer.weights += learning_rate * np.dot(layer.input, gradients)
-			adjusted_gradients = learning_rate * np.sum(gradients, axis=0, keepdims=True)
-			adjusted_gradients = adjusted_gradients.reshape(layer.biases.shape)
-			layer.biases += adjusted_gradients
-			# print(learning_rate * np.sum(gradients, axis=0, keepdims=True))
-			gradients = np.dot(gradients, layer.weights.T)
+		pass
+		# # Initialize gradients for backpropagation
+		# gradients = np.ones_like(outputs)
+
+		# # Iterate through layers in reverse order
+		# for layer in reversed(self.layers):
+		# 	gradients = gradients * layer.activation_function(layer.output, derivative=True)
+		# 	layer.weights += learning_rate * np.dot(layer.input, gradients)
+		# 	adjusted_gradients = learning_rate * np.sum(gradients, axis=0, keepdims=True)
+		# 	adjusted_gradients = adjusted_gradients.reshape(layer.biases.shape)
+		# 	layer.biases += adjusted_gradients
+		# 	# print(learning_rate * np.sum(gradients, axis=0, keepdims=True))
+		# 	gradients = np.dot(gradients, layer.weights.T)
 
 	def MSE(
 		computed_outputs : np.ndarray # Matrix, with each row representing an output vector
 		, expected_outputs : np.ndarray # Matrix, with each row representing an output vector
 	) -> np.ndarray: # Computed cost over all input-output pairs
 		# Compute the MSE per each expected-computed pairwise output
-		squared_error : np.ndarray = np.power(x1=(computed_outputs - expected_outputs), x2=2)
+		squared_error : np.ndarray = np.power((computed_outputs - expected_outputs), 2)
 		mse_per_output : np.ndarray = np.mean(a=squared_error, axis=1)
 		return mse_per_output
