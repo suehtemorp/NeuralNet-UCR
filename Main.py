@@ -21,11 +21,11 @@ from Library import Sequential, Dense_Layer, sigmoid
 xor_network = Sequential()
 
 # Add the input layer and hiden layer
-input_layer = Dense_Layer(num_nodes=2, input_dim=2, activation_function=sigmoid)
+input_layer = Dense_Layer(output_dim=2, input_dim=2, activation_function=sigmoid)
 xor_network.Add_Layer(input_layer)
 
 # Add the output layer
-output_layer = Dense_Layer(num_nodes=1, activation_function=sigmoid)
+output_layer = Dense_Layer(output_dim=1, input_dim=2, activation_function=sigmoid)
 xor_network.Add_Layer(output_layer)
 
 
@@ -35,7 +35,7 @@ y = np.array([[0], [1], [1], [0]])
 
 
 # Train the network
-final_error = xor_network.Train(X, y, learning_rate=0.1, epochs=1000, epoch_report_rate=10)
+final_error = xor_network.Train(X, y, learning_rate=0.1, epochs=1, epoch_report_rate=10)
 
 predictions = xor_network.Evaluate(X)
 binary_predictions = np.round(predictions)
