@@ -6,14 +6,10 @@ import sys
 import numpy as np
 
 # Inject dependencies
-def Install_Dependencies() -> None:
-    current_working_directory = os.path.dirname( __file__ )
-    library_directory = os.path.join(current_working_directory, '..', 'Library')
-    sys.path.append( library_directory )
-    import NeuralNetwork as NN
-
-# Install dependencies
-Install_Dependencies()
+current_working_directory = os.path.dirname( __file__ )
+library_directory = os.path.join(current_working_directory, '..', 'Library')
+sys.path.append( library_directory )
+import NeuralNetwork as NN
 
 # Activation function
 def sigmoid(x):
