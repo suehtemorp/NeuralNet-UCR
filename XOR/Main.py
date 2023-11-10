@@ -12,23 +12,30 @@ sys.path.append( library_directory )
 import NeuralNetwork as NN
 
 # Activation function
-def sigmoid(x):
-  return 1 / (1 + np.exp(-x))
+def sigmoid(x, derivative=False):
+  return 1 / (1 + np.exp(-x)) if derivative == False else x * (1 - x)
 
 # Create a MLP for XOR operations
-xor_network = NN.Neural_Network
+xor_network = NN.Sequential()
 
-# Add the input layer
-input_layer : NN.Neural_Layer(2, 2, sigmoid)
+# Add the input layer and hiden layer
+input_layer = NN.Dense_Layer(num_nodes=2, input_dim=2, activation_function=sigmoid)
 xor_network.Add_Layer(input_layer)
 
-# Add the hidden layer
-hidden_layer : NN.Neural_Layer(2, 2, sigmoid)
-xor_network.Add_Layer(hidden_layer)
-
 # Add the output layer
-output_layer : NN.Neural_Layer(2, 1, sigmoid)
-xor_network.Add_Layer(hidden_layer)
+output_layer = NN.Dense_Layer(num_nodes=1, activation_function=sigmoid)
+xor_network.Add_Layer(output_layer)
+
+
+# Example usage:
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([[0], [1], [1], [0]])
+
 
 # Train the network
-final_error = xor_network.Train([[0,0], [0,1], [1,0], [1,1]], [[0],[1],[1],[0]], 1, 1000, 10)
+final_error = xor_network.Train(X, y, learning_rate=0.1, epochs=1000, epoch_report_rate=10)
+
+predictions = xor_network.Evaluate(X)
+binary_predictions = np.round(predictions)
+print("Predictions after training:")
+print(predictions)

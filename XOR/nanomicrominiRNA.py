@@ -11,22 +11,6 @@ def sigmoid(x, derivative=False):
 def relu(x, derivative=False):
 	return max(0, x)
 
-# layer = {
-# 	'num_nodes': num_nodes,
-# 	'activation_function': activation_function,
-# 	'weights': np.random.uniform(-1, 1, (layer_input_size, num_nodes)),
-# 	'biases': np.zeros((1, num_nodes))
-# }
-
-# def feedforward(self, X):
-# 	layer_outputs = []
-# 	for layer in self.layers:
-# 		layer_input = X if not layer_outputs else layer_outputs[-1]
-# 		weighted_sum = np.dot(layer_input, layer['weights']) + layer['biases']
-# 		layer_output = layer['activation_function'](weighted_sum)
-# 		layer_outputs.append(layer_output)
-# 	return layer_outputs
-
 class Layer(ABC):
 	def __init__(self, num_nodes, activation_function, input_dim, weights, biases):
 		self.num_nodes = num_nodes
@@ -123,10 +107,10 @@ nn.add_layer(num_nodes=2, activation_function=sigmoid)
 nn.add_layer(num_nodes=1, activation_function=sigmoid)
 
 # Train the network
-nn.train(X, y, epochs=10000, learning_rate=0.1)
+nn.train(X, y, epochs=10000, learning_rate=1)
 
 # Test the network
 predictions = nn.evaluate(X)
 binary_predictions = np.round(predictions)
 print("Predictions after training:")
-print(predictions)
+print(binary_predictions)
