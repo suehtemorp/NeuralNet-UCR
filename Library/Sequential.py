@@ -58,17 +58,16 @@ class Sequential(Neural_Network):
 
 			# Compute an individual output per input
 			for individual_input in inputs:
-				print(f"Individual input shape {individual_input[:, np.newaxis]}")
 				np.append(computed_outputs, self.Predict(inputs=individual_input[:, np.newaxis]))
-			
+
 			# Backpropagate the error through the network
-			self.Backpropagate(inputs=inputs, outputs=outputs, learning_rate=learning_rate)
+			self.Backpropagate(inputs=computed_outputs, outputs=outputs, learning_rate=learning_rate)
 
 			if epoch % epoch_report_rate == 0:
 				error = Sequential.Compute_Error(outputs=outputs, computed_outputs=computed_outputs)
 				print(f'Error after {epoch} epochs: {error}')
 		
-		computed_outputs : np.ndarray = self.Feed_Forward(inputs=inputs)
+		# computed_outputs : np.ndarray = self.Feed_Forward(inputs=inputs)
 		return self.Compute_Error(outputs=outputs, computed_outputs=computed_outputs)
 
 	def Predict(
@@ -80,20 +79,21 @@ class Sequential(Neural_Network):
 		layer_output = inputs
 		for layer in self.layers:
 			layer_output = layer.Predict(layer_output)
-			layer.output = layer_output
-			print(f"Predict: Layer output shape {layer_output.shape}")
 
 		# The predicted output is taken from the last activation
 		return layer_output
 
-	def Backpropagate(self, outputs, learning_rate):
+	def Backpropagate(self, inputs, outputs, learning_rate):
 		"""Readjust weights based on a subset of inputs and the corresponding outputs"""
 		# Initialize gradients for backpropagation
 		gradients = np.ones_like(outputs)
-
+		print(f"Gradients: {gradients.shape}", gradients)
 		# Iterate through layers in reverse order
 		for layer in reversed(self.layers):
+			print(f"Layer: {layer.output.shape}", layer.output)
 			gradients = gradients * layer.activation_function(layer.output, derivative=True)
+			print(f"Gradients: {gradients.shape}", gradients)
+			exit()
 			layer.weights += learning_rate * np.dot(layer.input, gradients)
 			adjusted_gradients = learning_rate * np.sum(gradients, axis=0, keepdims=True)
 			adjusted_gradients = adjusted_gradients.reshape(layer.biases.shape)
