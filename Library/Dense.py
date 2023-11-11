@@ -28,11 +28,12 @@ class Dense_Layer(Neural_Layer):
     ) -> np.ndarray: # Predicted output vector
 		# Compute the weighted sum of the previous layer, and after applying the
         # activation function, set it as this layer's activation 
+		self.last_input = layer_input
 		weighted_sum = np.dot(self.weights, layer_input.T) + self.biases
-		self.output = self.activation_function(weighted_sum)
+		self.last_output = self.activation_function(weighted_sum)
 		
 		# print(f"Predict: Layer output shape {self.output.T.shape}, {self.output}")
-		return self.output.T
+		return self.last_output.T
 	
 	def Connect_Layer(
 		self

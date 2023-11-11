@@ -59,7 +59,8 @@ class Sequential(Neural_Network):
 			computed_outputs = self.Predict(inputs=inputs)
 			
 			# Backpropagate the error through the network
-			self.Backpropagate(outputs=outputs, learning_rate=learning_rate)
+			# for out, expected in zip(computed_outputs, outputs):
+			self.Backpropagate(computed_outputs=computed_outputs, expected_outputs=outputs, learning_rate=learning_rate)
 
 			if epoch % epoch_report_rate == 0:
 				error = Sequential.Compute_Error(expected_outputs=outputs, computed_outputs=computed_outputs)
@@ -80,21 +81,32 @@ class Sequential(Neural_Network):
 		# The predicted output is taken from the last activation
 		return layer_output
 
-	def Backpropagate(self, inputs, outputs, learning_rate):
-		"""Readjust weights based on a subset of inputs and the corresponding outputs"""
-		pass
-		# # Initialize gradients for backpropagation
-		# gradients = np.ones_like(outputs)
+	# def Backpropagate(self, inputs, outputs, learning_rate):
+	# 	"""Readjust weights based on a subset of inputs and the corresponding outputs"""
+	# 	pass
 
-		# # Iterate through layers in reverse order
-		# for layer in reversed(self.layers):
-		# 	gradients = gradients * layer.activation_function(layer.output, derivative=True)
-		# 	layer.weights += learning_rate * np.dot(layer.input, gradients)
-		# 	adjusted_gradients = learning_rate * np.sum(gradients, axis=0, keepdims=True)
-		# 	adjusted_gradients = adjusted_gradients.reshape(layer.biases.shape)
-		# 	layer.biases += adjusted_gradients
-		# 	# print(learning_rate * np.sum(gradients, axis=0, keepdims=True))
-		# 	gradients = np.dot(gradients, layer.weights.T)
+	def Backpropagate(self, computed_outputs, expected_outputs, learning_rate):
+		"""Readjust weights based on a subset of inputs and the corresponding outputs"""
+		# Compute the error between the predicted output and the target output
+		error = Sequential.Compute_Error(expected_outputs=expected_outputs, computed_outputs=computed_outputs)
+
+		# Propagate the error backward through the network
+		for i in reversed(range(len(self.layers))):
+			layer = self.layers[i]
+			if i == len(self.layers) - 1:
+				# For the output layer, use the error computed above
+				layer_error = error
+			else:
+				# For hidden layers, use the error from the previous layer
+				l = np.dot(layer.weights, layer.activation_function(layer.last_output, derivative=True))
+				layer_error = np.mean(np.dot(l, layer_error))
+				# print(f"Error: {layer_error.shape}", layer_error)
+				# exit()
+
+			layer.weights -= np.dot(layer_error, layer.weights) + learning_rate * np.random.uniform(-1, 1, layer.weights.shape)
+			layer.biases -= np.dot(layer_error, layer.biases) + learning_rate * np.random.uniform(-1, 1, layer.biases.shape)
+
+
 
 	def MSE(
 		computed_outputs : np.ndarray # Matrix, with each row representing an output vector

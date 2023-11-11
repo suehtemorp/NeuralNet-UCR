@@ -37,7 +37,7 @@ print(f"Shape of X {X.shape}")
 
 
 # Train the network
-final_error = xor_network.Train(X, y, learning_rate=0.1, epochs=1, epoch_report_rate=10)
+final_error = xor_network.Train(X, y, learning_rate=0.01, epochs=10000, epoch_report_rate=10)
 
 predictions = xor_network.Predict(X)
 binary_predictions = np.round(predictions)
