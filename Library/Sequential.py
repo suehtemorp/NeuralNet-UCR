@@ -54,13 +54,15 @@ class Sequential(Neural_Network):
 		# We should consider estochastic training instead for perfomance
 		
 		computed_outputs : np.ndarray = []
+		error = 100.0
 		for epoch in range(epochs):
+			for layer_input, expected_output in zip(inputs, outputs):
 			# Keep track of computed outputs
-			computed_outputs = self.Predict(inputs=inputs)
+			computed_outputs = self.Predict(inputs=layer_input)
 			
 			# Backpropagate the error through the network
 			# for out, expected in zip(computed_outputs, outputs):
-			self.Backpropagate(computed_outputs=computed_outputs, expected_outputs=outputs, learning_rate=learning_rate)
+			self.Backpropagate(computed_outputs=computed_outputs, expected_outputs=expected_output, learning_rate=learning_rate)
 
 			if epoch % epoch_report_rate == 0:
 				error = Sequential.Compute_Error(expected_outputs=outputs, computed_outputs=computed_outputs)
