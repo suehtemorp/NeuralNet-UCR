@@ -1,6 +1,9 @@
 # Numpy numericals
 import numpy as np
 
+# Error funtion utilities
+from .ErrorFunctions import Mean, Squared_Error
+
 # Type hints
 import typing
 
@@ -30,17 +33,6 @@ class Sequential(Neural_Network):
 		# Append the layer to the list
 		self.layers.append(next_layer)
 
-	def Compute_Error(
-		computed_outputs : np.ndarray # Matrix, with each row representing an output vector
-		, expected_outputs : np.ndarray # Matrix, with each row representing an output vector
-	) -> np.float64: # Computed cost over all input-output pairs
-		# Compute the MSE per each expected-computed pairwise output
-		mse_per_output : np.ndarray = Sequential.MSE(computed_outputs, expected_outputs)
-
-		# Compute the mean of the MSE as the overall error
-		mse_across_outputs : np.float64 = np.mean(a=mse_per_output)
-		return mse_across_outputs 
-
 	def Train(
 		self
 		, inputs : np.ndarray # Matrix, with each row representing an input vector
@@ -63,10 +55,10 @@ class Sequential(Neural_Network):
 			self.Backpropagate(computed_outputs=computed_outputs, expected_outputs=outputs, learning_rate=learning_rate)
 
 			if epoch % epoch_report_rate == 0:
-				error = Sequential.Compute_Error(expected_outputs=outputs, computed_outputs=computed_outputs)
+				error = Sequential.Cost_Overall(expected_outputs=outputs, computed_outputs=computed_outputs)
 				print(f'Error after {epoch} epochs: {error}')
 
-		return Sequential.Compute_Error(expected_outputs=outputs, computed_outputs=computed_outputs)
+		return Sequential.Cost_Overall(expected_outputs=outputs, computed_outputs=computed_outputs)
 
 	def Predict(
 		self
@@ -87,8 +79,8 @@ class Sequential(Neural_Network):
 
 	def Backpropagate(self, computed_outputs, expected_outputs, learning_rate):
 		"""Readjust weights based on a subset of inputs and the corresponding outputs"""
-		# Compute the error between the predicted output and the target output
-		error = Sequential.Compute_Error(expected_outputs=expected_outputs, computed_outputs=computed_outputs)
+		# Keep track of the error
+		error = Sequential.Cost_Overall(expected_outputs=expected_outputs, computed_outputs=computed_outputs)
 
 		# Propagate the error backward through the network
 		for i in reversed(range(len(self.layers))):
@@ -106,13 +98,23 @@ class Sequential(Neural_Network):
 			layer.weights -= np.dot(layer_error, layer.weights) + learning_rate * np.random.uniform(-1, 1, layer.weights.shape)
 			layer.biases -= np.dot(layer_error, layer.biases) + learning_rate * np.random.uniform(-1, 1, layer.biases.shape)
 
-
-
-	def MSE(
+	def Cost_Overall(
 		computed_outputs : np.ndarray # Matrix, with each row representing an output vector
 		, expected_outputs : np.ndarray # Matrix, with each row representing an output vector
-	) -> np.ndarray: # Computed cost over all input-output pairs
+	) -> np.float64: # Computed cost over all input-output pairs
+		"""Compute the average of the cost function for each computed-to-expected output"""
+
 		# Compute the MSE per each expected-computed pairwise output
-		squared_error : np.ndarray = np.power((computed_outputs - expected_outputs), 2)
-		mse_per_output : np.ndarray = np.mean(a=squared_error, axis=1)
-		return mse_per_output
+		mse_per_output : np.ndarray = Sequential.Cost_Per_Output(computed_outputs, expected_outputs)
+
+		# Compute the mean of the MSE as the overall error
+		mse_across_outputs : np.float64 = np.mean(a=mse_per_output)
+		return mse_across_outputs 
+
+	def Cost_Per_Output(
+		computed_outputs : np.ndarray # Matrix, with each row representing an output vector
+		, expected_outputs : np.ndarray # Matrix, with each row representing an output vector
+	) -> np.ndarray: # Matrix, with each row representing the cost per output row
+		"""Compute the cost function for each computed output to its corresponding expected output"""
+		# Compute the MSE per each expected-computed pairwise output
+		return Mean(Squared_Error(computed_outputs, expected_outputs), axis=1)

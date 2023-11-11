@@ -61,7 +61,7 @@ class Neural_Network (metaclass=AbstractClass):
 		pass
 
 	@AbstractMethod
-	def Compute_Error(
+	def Cost_Overall(
 		computed_outputs : np.ndarray # Matrix, with each row representing an output vector
 		, expected_outputs : np.ndarray # Matrix, with each row representing an output vector
 	) -> np.float64: # Computed cost over all input-output pairs
