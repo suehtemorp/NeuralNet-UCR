@@ -41,10 +41,10 @@ class Sequential(Neural_Network):
 		, epochs : np.uint64 # Iteration count for training backpropagation cycles
 		, epoch_report_rate : np.uint64 = 1 # How many epochs until next error report
 		, loss_floor : np.float64 = None # Loss to match or go under to stop iterations
-	) -> np.float64: # Computed cost over all input-output pairs, after training
+	) -> np.ndarray: # Matrix, with each row representing a cost on an epoch. Higher index means later epoch
 
-		# Keep track of the last error cost
-		error : np.float64 = 0
+		# Keep track of the error per epoch
+		error : np.ndarray = np.ndarray(shape=(1,1))
 
 		# This naive implementation trains the network on all input-output pairs at once
 		# We should consider estochastic training instead for perfomance 
@@ -55,13 +55,20 @@ class Sequential(Neural_Network):
 			# Backpropagate the error through the network
 			# for out, expected in zip(computed_outputs, outputs):
 			self.Backpropagate(computed_outputs=computed_outputs, expected_outputs=outputs, learning_rate=learning_rate)
-			error = Sequential.Cost_Overall(expected_outputs=outputs, computed_outputs=computed_outputs)
 			
+			# Keep track of the error per epoch
+			error = np.append(
+				arr=error
+				, values=Sequential.Cost_Overall(expected_outputs=outputs, computed_outputs=computed_outputs)
+			)
+			
+			# Report latest error if the epoch rate demands it so
 			if epoch % epoch_report_rate == 0:
-				print(f'>>>> Error after {epoch + 1} epochs: {error}')
+				print(f'>>>> Error after {epoch + 1} epochs: {error[-1]}')
 			
-			if (loss_floor != None and error <= loss_floor):
-				print(f'>>>> Loss floor reached or surpassed at {epoch + 1} epochs. Loss is: {error}')
+			# Break the training cycle if the loss floor is matched or surpassed with even lesser loss
+			if (loss_floor != None and error[-1] <= loss_floor):
+				print(f'>>>> Loss floor reached or surpassed at {epoch + 1} epochs. Loss is: {error[-1]}')
 				break
 		
 		return error
