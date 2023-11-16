@@ -40,11 +40,14 @@ class Sequential(Neural_Network):
 		, learning_rate : np.float64 # Learning rate. Bigger values mean higher rate
 		, epochs : np.uint64 # Iteration count for training backpropagation cycles
 		, epoch_report_rate : np.uint64 = 1 # How many epochs until next error report
-		) -> np.float64: # Computed cost over all input-output pairs, after training
+		, loss_floor : np.float64 = None # Loss to match or go under to stop iterations
+	) -> np.float64: # Computed cost over all input-output pairs, after training
+
+		# Keep track of the last error cost
+		error : np.float64 = 0
 
 		# This naive implementation trains the network on all input-output pairs at once
-		# We should consider estochastic training instead for perfomance
-
+		# We should consider estochastic training instead for perfomance 
 		for epoch in range(epochs):
 			# Keep track of computed outputs
 			computed_outputs : np.ndarray = self.Predict(inputs=inputs)
@@ -52,12 +55,16 @@ class Sequential(Neural_Network):
 			# Backpropagate the error through the network
 			# for out, expected in zip(computed_outputs, outputs):
 			self.Backpropagate(computed_outputs=computed_outputs, expected_outputs=outputs, learning_rate=learning_rate)
-
+			error = Sequential.Cost_Overall(expected_outputs=outputs, computed_outputs=computed_outputs)
+			
 			if epoch % epoch_report_rate == 0:
-				error = Sequential.Cost_Overall(expected_outputs=outputs, computed_outputs=computed_outputs)
 				print(f'>>>> Error after {epoch + 1} epochs: {error}')
-
-		return Sequential.Cost_Overall(expected_outputs=outputs, computed_outputs=computed_outputs)
+			
+			if (loss_floor != None and error <= loss_floor):
+				print(f'>>>> Loss floor reached or surpassed at {epoch + 1} epochs. Loss is: {error}')
+				break
+		
+		return error
 
 	def Predict(
 		self
@@ -69,8 +76,8 @@ class Sequential(Neural_Network):
 		for layer in self.layers:
 			layer_output = layer.Predict(layer_output)
 
-		print("Network predicted activations")
-		print(layer_output)
+		# print("Network predicted activations")
+		# print(layer_output)
 
 		# The predicted output is taken from the last activation
 		return layer_output
@@ -127,15 +134,6 @@ class Sequential(Neural_Network):
 				next_layer : Neural_Layer = self.layers[i+1]
 				layer_error_correction = next_layer.Gradients_From_Activation(layer_error_correction, layer)
 
-			print("Error correction with shape", layer_error_correction.shape)
-			print(layer_error_correction)
-
-			print("Layer last input",layer.last_input.shape)
-			print(layer.last_input)
-
-			print("Matmul shape")
-			print(np.matmul(layer.last_input, layer_error_correction.T).shape)
-
 			weights_delta : np.ndarray = Mean(
 				x = np.matmul(layer.last_input, layer_error_correction.T)
 				, axis=1
@@ -177,10 +175,10 @@ class Sequential(Neural_Network):
 			layer.weights += weights_delta
 			layer.biases += biases_delta
 
-			print("Weights")
-			print(layer.weights)
-			print("Biases")
-			print(layer.biases)
+			# print("Weights")
+			# print(layer.weights)
+			# print("Biases")
+			# print(layer.biases)
 
 	def Cost_Overall(
 		computed_outputs : np.ndarray # Matrix, with each column representing an output vector
