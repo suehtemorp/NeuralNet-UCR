@@ -1,22 +1,10 @@
-# # OS and System utilities
-# import os
-# import sys
-
-# # Numpy data science
-# import numpy as np
-
-# # Inject dependencies
-# current_working_directory = os.path.dirname( __file__ )
-# library_directory = os.path.join(current_working_directory, '..', 'Library')
-# sys.path.append( library_directory )
-# import NeuralNetwork as NN
-
-# # Activation function
-# def sigmoid(x, derivative=False):
-#   return 1 / (1 + np.exp(-x)) if derivative == False else x * (1 - x)
+# Numpy data science
 import numpy as np
+
+# Data viz
 import matplotlib.pyplot as plt
 
+# Dependencies
 from Library import Sequential, Dense_Layer, sigmoid, relu
 
 # Create a MLP for XOR operations
@@ -55,7 +43,6 @@ print("Rounded-up predictions after training:")
 print(np.rint(predictions))
 
 # Visualize the loss over time
-print(errors_per_epoch.shape)
 plt.plot(errors_per_epoch)
 plt.xlabel("Epochs")
 plt.ylabel("Loss with averaged MSE")
