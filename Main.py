@@ -16,30 +16,36 @@
 #   return 1 / (1 + np.exp(-x)) if derivative == False else x * (1 - x)
 import numpy as np
 
-from Library import Sequential, Dense_Layer, sigmoid
+from Library import Sequential, Dense_Layer, sigmoid, relu
+
 # Create a MLP for XOR operations
 xor_network = Sequential()
 
 # Add the input layer and hiden layer
-input_layer = Dense_Layer(output_dim=2, input_dim=2, activation_function=sigmoid)
+input_layer = Dense_Layer(output_dim=3, input_dim=2, activation_function=relu)
 xor_network.Add_Layer(input_layer)
 
 # Add the output layer
-output_layer = Dense_Layer(output_dim=1, input_dim=2, activation_function=sigmoid)
+output_layer = Dense_Layer(output_dim=1, input_dim=3, activation_function=sigmoid)
 xor_network.Add_Layer(output_layer)
 
 
 # Example usage:
-X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-y = np.array([[0], [1], [1], [0]])
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T
+y = np.array([[0], [1], [1], [0]]).T
 
 print(f"Shape of X {X.shape}")
 
 
 # Train the network
-final_error = xor_network.Train(X, y, learning_rate=0.01, epochs=10000, epoch_report_rate=10)
+print("Training time!")
+final_error = xor_network.Train(X, y, learning_rate=0.2, epochs=30, epoch_report_rate=1)
 
+print("Prediction time!")
 predictions = xor_network.Predict(X)
-binary_predictions = np.round(predictions)
-print("Predictions after training:")
+print("Estimates after training:")
 print(predictions)
+
+binary_predictions = np.rint(predictions)
+print("Predictions after training:")
+print(binary_predictions)
