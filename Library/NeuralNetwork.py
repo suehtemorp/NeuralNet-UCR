@@ -83,7 +83,8 @@ class Neural_Network (metaclass=AbstractClass):
 		, outputs : np.ndarray # Matrix, with each column representing an output vector
 		, learning_rate : np.float64 # Learning rate. Bigger values mean higher rate
 		, epochs : np.uint64 # Iteration count for training backpropagation cycles
-		, epoch_report_rate : np.uint = 1 # How many epochs until next error report
+		, epoch_report_rate : np.uint64 = 1 # How many epochs until next error report
+		, loss_floor : np.float64 = None # Loss to match or go under to stop iterations
 	) -> np.float64: # Computed cost over all input-output pairs, after training
 		"""Train the Neural Network, and get the final error after the last epoch"""
 		pass
