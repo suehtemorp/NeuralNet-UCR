@@ -24,8 +24,8 @@ class Neural_Layer (metaclass=AbstractClass):
 		# Activation function
 		self.activation_function : np.uint = activation_function
 		# Output values stored inside layer
-		self.last_output : np.ndarray = np.zeros(shape=(output_dim, 1), dtype=np.float64)
-		self.last_preactivations : np.ndarray = np.zeros(shape=(output_dim, 1), dtype=np.float64)
+		self.last_output : np.ndarray = np.zeros(shape=(output_dim, 1), dtype=np.longdouble)
+		self.last_preactivations : np.ndarray = np.zeros(shape=(output_dim, 1), dtype=np.longdouble)
 		self.last_input : np.ndarray # Shape decided by implementation
 
 	@AbstractMethod
