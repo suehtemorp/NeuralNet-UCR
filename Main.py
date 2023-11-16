@@ -22,11 +22,11 @@ from Library import Sequential, Dense_Layer, sigmoid, relu
 xor_network = Sequential()
 
 # Add the input layer and hiden layer
-input_layer = Dense_Layer(output_dim=3, input_dim=2, activation_function=relu)
+input_layer = Dense_Layer(output_dim=4, input_dim=2, activation_function=relu)
 xor_network.Add_Layer(input_layer)
 
 # Add the output layer
-output_layer = Dense_Layer(output_dim=1, input_dim=3, activation_function=sigmoid)
+output_layer = Dense_Layer(output_dim=1, input_dim=4, activation_function=sigmoid)
 xor_network.Add_Layer(output_layer)
 
 
@@ -39,7 +39,7 @@ print(f"Shape of X {X.shape}")
 
 # Train the network
 print("Training time!")
-final_error = xor_network.Train(X, y, learning_rate=0.2, epochs=30, epoch_report_rate=1)
+final_error = xor_network.Train(inputs=X, outputs=y, learning_rate=0.25, epochs=40000, epoch_report_rate=10, loss_floor=0.01)
 
 print("Prediction time!")
 predictions = xor_network.Predict(X)
