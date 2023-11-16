@@ -15,6 +15,7 @@
 # def sigmoid(x, derivative=False):
 #   return 1 / (1 + np.exp(-x)) if derivative == False else x * (1 - x)
 import numpy as np
+import matplotlib.pyplot as plt
 
 from Library import Sequential, Dense_Layer, sigmoid, relu
 
@@ -29,23 +30,34 @@ xor_network.Add_Layer(input_layer)
 output_layer = Dense_Layer(output_dim=1, input_dim=4, activation_function=sigmoid)
 xor_network.Add_Layer(output_layer)
 
-
 # Example usage:
 X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T
 y = np.array([[0], [1], [1], [0]]).T
 
-print(f"Shape of X {X.shape}")
+print("Inputs with shape", X.shape)
+print(X)
 
+print("Expected outputs with shape", y.shape)
+print(y)
 
 # Train the network
 print("Training time!")
-final_error = xor_network.Train(inputs=X, outputs=y, learning_rate=0.25, epochs=40000, epoch_report_rate=10, loss_floor=0.01)
+errors_per_epoch : np.ndarray = xor_network.Train(inputs=X, outputs=y, learning_rate=0.25, epochs=4000, epoch_report_rate=1000, loss_floor=0.01)
 
+# Make predictions on the data set
 print("Prediction time!")
 predictions = xor_network.Predict(X)
-print("Estimates after training:")
+
+print("Predictions after training:")
 print(predictions)
 
-binary_predictions = np.rint(predictions)
-print("Predictions after training:")
-print(binary_predictions)
+print("Rounded-up predictions after training:")
+print(np.rint(predictions))
+
+# Visualize the loss over time
+print(errors_per_epoch.shape)
+plt.plot(errors_per_epoch)
+plt.xlabel("Epochs")
+plt.ylabel("Loss with averaged MSE")
+plt.title("Evolution of average loss on the entire dataset with respect to epoch")
+plt.show()
