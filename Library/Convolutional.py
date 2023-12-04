@@ -45,15 +45,24 @@ class Convolutional_Layer(Neural_Layer):
         if layer_input.shape != self.input_shape:
             raise ValueError("Input shape does not match the expected input shape for the convolutional layer")
 
-        convolved_output = self._convolve(layer_input) + self.biases
-        self.last_input = layer_input
-        self.last_preactivations = convolved_output
-        self.last_output = self.activation_function(convolved_output)
+        # Perform the convolution operation
+        convolved_output = self._convolve(layer_input)
+
+        # Broadcast biases across the last two dimensions
+        biases_broadcasted = self.biases[:, :, np.newaxis]
+
+        # Add biases to the convolved output
+        self.last_preactivations = convolved_output + biases_broadcasted
+
+        # Apply activation function
+        self.last_output = self.activation_function(self.last_preactivations)
+
         return self.last_output
+
 
     def Connect_Layer(self, next_layer: "Neural_Layer") -> None:
         # Check if the number of filters matches the next layer's input channels
-        if self.num_filters != next_layer.input_dim[2]:
+        if next_layer.input_dim is not None and self.num_filters != next_layer.input_dim[2]:
             raise Exception("Number of filters in the convolutional layer must match the input channels of the next layer")
     
     def Gradients_From_Activation(

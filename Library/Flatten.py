@@ -13,7 +13,9 @@ class Flatten_Layer(Neural_Layer):
         self.last_input_shape = layer_input.shape
 
         # Flatten the input
-        return layer_input.reshape((layer_input.shape[0], -1))
+        self.last_output = layer_input.reshape((layer_input.shape[0], -1))
+
+        return self.last_output
 
     def Connect_Layer(self, next_layer):
         # No connection needed for Flatten layer

@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 # Numpy data science
 import numpy as np
@@ -26,33 +25,50 @@ convolutional_layer = Convolutional_Layer(
 # Add the Convolutional Layer to the model
 model.Add_Layer(convolutional_layer)
 
+# Predict on a dummy input to initialize last_output
+# dummy_input = np.random.rand(1024, 1024, 1)
+# convolutional_layer.Predict(dummy_input)
+
 # Flatten layer to connect to the Dense layer
 flatten_layer = Flatten_Layer()
+dummy_input = np.random.rand(16, 1022, 1022)
+flatten_layer.Predict(dummy_input)
 model.Add_Layer(flatten_layer)
+
+print (f"Input for dense layer: {flatten_layer.last_output.shape}")
+# Now you can safely connect the layers
+# model.layers[-2].Connect_Layer(model.layers[-1])
+# model.layers[-3].Connect_Layer(model.layers[-2])
+
+# print ("Shape:", np.prod(convolutional_layer.last_output.shape))
+# Shape: 16711744
 
 # Define the Dense Layer with one output
 dense_layer = Dense_Layer(
     output_dim=1,
-    input_dim=np.prod(convolutional_layer.last_output.shape),
-    activation_function=np.sigmoid  # You can choose an activation function
+    input_dim=flatten_layer.last_output.shape[0],
+    activation_function=sigmoid  # You can choose an activation function
 )
-
-# Add the Dense Layer to the model
 model.Add_Layer(dense_layer)
+# Define the Dense Layer with one output
+# (1, 1044484)
 
 # # Read and preprocess the image
-# image_path = "path/to/your/image.jpg"
-# image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-# image = cv2.resize(image, (1024, 1024))  # Resize the image to match the model's input size
-# image = image.reshape((1, 1024, 1024, 1))  # Add batch dimension and channel dimension
+image_path = "./input/input.png"
+image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+image = cv2.resize(image, (1024, 1024))  # Resize the image to match the model's input size
+image = image.reshape((1024, 1024, 1))  # Add batch dimension and channel dimension
 
-# # Normalize pixel values to be between 0 and 1
-# image = image.astype(np.float64) / 255.0
+# Normalize pixel values to be between 0 and 1
+image = image.astype(np.float64) / 255.0
 
-# # Predict using the model
-# output = model.Predict(image)
+# print(image.shape)
+# dummy_output = convolutional_layer.Predict(image)
 
-# # Print the predicted output
-# print("Predicted Output:", output)
+# print("dummy_output_shape:", dummy_output.shape)
+# print("input_dim:", np.prod(dummy_output.shape))
+# Predict using the model
+output = model.Predict(image)
 
-print("read data")
+# Print the predicted output
+print("Predicted Output:", output.flatten())
