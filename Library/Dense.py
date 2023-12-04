@@ -36,18 +36,6 @@ class Dense_Layer(Neural_Layer):
 
 		self.last_output = self.activation_function(self.last_preactivations)
 
-		# print("Layer preactivations")
-		# print(self.last_preactivations)
-
-		# print("Layer predicted activations")
-		# print(self.last_output)
-
-		# print("Layer weights")
-		# print(self.weights)
-
-		# print("Layer biases")
-		# print(self.biases)
-
 		return self.last_output
 	
 	def Connect_Layer(

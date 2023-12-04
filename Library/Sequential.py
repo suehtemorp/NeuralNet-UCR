@@ -83,9 +83,6 @@ class Sequential(Neural_Network):
 		for layer in self.layers:
 			layer_output = layer.Predict(layer_output)
 
-		# print("Network predicted activations")
-		# print(layer_output)
-
 		# The predicted output is taken from the last activation
 		return layer_output
 
@@ -128,9 +125,6 @@ class Sequential(Neural_Network):
 					, derivative=True)
 				preactivations_to_activations_gradients = preactivations_to_activations_gradients.diagonal().T
 
-				# print("Preactivation to cost gradients")
-				# print(preactivations_to_activations_gradients)
-
 				# The last layer deltas is exactly the same as the gradients from the preactivations to the cost function, 
 				# computed as the product element-wise between these other set of gradients
 				layer_error_correction = np.multiply(preactivations_to_activations_gradients, activations_to_cost_gradients)
@@ -166,12 +160,6 @@ class Sequential(Neural_Network):
 			weights_delta *= -learning_rate
 			biases_delta *= -learning_rate
 
-			# print("Weights delta")
-			# print(weights_delta)
-
-			# print("Bias delta")
-			# print(biases_delta)
-
 			# Store but don't apply just yet the adjustment for each weight and bias
 			# This will ensure application of deltas don't muddy the calculations for other deltas
 			weights_deltas.insert(0, weights_delta)
@@ -181,11 +169,6 @@ class Sequential(Neural_Network):
 		for (layer, weights_delta, biases_delta) in zip(self.layers, weights_deltas, biases_deltas):
 			layer.weights += weights_delta
 			layer.biases += biases_delta
-
-			# print("Weights")
-			# print(layer.weights)
-			# print("Biases")
-			# print(layer.biases)
 
 	def Cost_Overall(
 		computed_outputs : np.ndarray # Matrix, with each column representing an output vector
