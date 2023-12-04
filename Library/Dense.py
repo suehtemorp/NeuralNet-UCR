@@ -28,7 +28,6 @@ class Dense_Layer(Neural_Layer):
     ) -> np.ndarray: # Matrix, with each column representing an output vector
 		# Compute the weighted sum of the previous layer, and after applying the
         # activation function, set it as this layer's activation 
-		# print(">>>>> Layer prediction time!")
 		
 		self.last_input = layer_input
 
@@ -52,19 +51,10 @@ class Dense_Layer(Neural_Layer):
 		layer_error_correction : np.ndarray,
 		previous_layer : Neural_Layer
 	) -> np.ndarray: # Matrix, with each column representing the gradient vector for each output of this layer
-		# print(">>>>> Gradient time!")
 		
-		# print(f"Layer error correction with shape {layer_error_correction.shape}")
-		# print(layer_error_correction)
 
 		# Compute the gradients for the pre-activations of this layer with respect to the activations of the previous layer 
 		preactivation_jacobian_at_layer : np.ndarray = np.dot(self.weights.T, layer_error_correction)
-
-		# print(f"Preactivation jacobian at layer with shape: {preactivation_jacobian_at_layer.shape}")
-		# print(preactivation_jacobian_at_layer)
-
-		# print("Previous layer pre-activation")
-		# print(previous_layer.last_preactivations)
 
 		# Compute the gradients for the activations of this layer with respect to the pre-activations this layer
 		activation_jacobians : np.ndarray = np.apply_along_axis(
@@ -73,13 +63,7 @@ class Dense_Layer(Neural_Layer):
 			, derivative=True)
 		activation_jacobians = activation_jacobians.diagonal().T
 
-		# print(f"Activation jacobian with shape: {activation_jacobians.shape}")
-		# print(activation_jacobians)
-
 		# Compute the Jacobian for the activated outputs of this layer with respect to the previous layer 
 		activation_jacobians_at_layer = np.multiply(preactivation_jacobian_at_layer, activation_jacobians)
-		
-		# print(f"Activation jacobian at layer with shape: {activation_jacobians_at_layer.shape}")
-		# print(activation_jacobians_at_layer)
 
 		return activation_jacobians_at_layer
