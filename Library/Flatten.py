@@ -1,6 +1,7 @@
 import numpy as np
 from .NeuralNetwork import Neural_Layer
 
+from .ActivationFunctions import identity
 class Flatten_Layer(Neural_Layer):
     """Flatten layer for a neural network"""
 
@@ -8,6 +9,7 @@ class Flatten_Layer(Neural_Layer):
         super().__init__(output_dim=None, input_dim=None, activation_function=None)
         self.input_shape = input_shape
         self.output_dim = np.prod(input_shape)
+        self.activation_function = identity
 
     def Predict(self, layer_input: np.ndarray) -> np.ndarray:
         # Save the input shape for later use (during backpropagation)
@@ -15,7 +17,7 @@ class Flatten_Layer(Neural_Layer):
 
         # Flatten the input
         self.last_output = layer_input.reshape((layer_input.shape[0], -1))
-        print(f"Last output: {self.last_output.shape}")
+        # print(f"Last output: {self.last_output.shape}")
         # print(f"Last transposed output: {self.last_output.T.shape}")
 
         return self.last_output.T

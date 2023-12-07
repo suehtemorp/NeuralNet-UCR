@@ -53,6 +53,8 @@ class Sequential(Neural_Network):
 			# Keep track of computed outputs
 			computed_outputs : np.ndarray = self.Predict(inputs=inputs)
 			
+			# print(computed_outputs)
+			# print(outputs)
 			# Backpropagate the error through the network
 			# for out, expected in zip(computed_outputs, outputs):
 			self.Backpropagate(computed_outputs=computed_outputs, expected_outputs=outputs, learning_rate=learning_rate)

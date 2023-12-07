@@ -49,7 +49,7 @@ def Mean_Squared_Error(
 
         return np.dot(
             2 / component_count
-            , computed_outputs-expected_outputs
+            , computed_outputs - expected_outputs
         )
 
     else:

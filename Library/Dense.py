@@ -108,7 +108,7 @@ class Dense_Layer(Neural_Layer):
 		# Compute the gradients for the activations of this layer with respect to the pre-activations this layer
 		activation_jacobians : np.ndarray = np.apply_along_axis(
 			func1d=self.previous_layer.activation_function
-			, axis=0, arr=self.previous_layer.last_preactivations
+			, axis=0, arr=self.previous_layer.last_output
 			, derivative=True)
 		activation_jacobians = activation_jacobians.diagonal().T
 
