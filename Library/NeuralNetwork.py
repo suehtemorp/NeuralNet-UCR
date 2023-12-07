@@ -30,17 +30,33 @@ class Neural_Layer(metaclass=ABCMeta):
         """Compute an individual output based on an individual input"""
 
     @abstractmethod
-    def Connect_Layer(
+    def Connect_To_Next_Layer(
         self,
         next_layer: "Neural_Layer"  # Layer to connect to.
     ) -> None:
-        """Connects the next layer with the current layer"""
+        """Connects the current layer to its next layer"""
+        
+    @abstractmethod
+    def Connect_To_Previous_Layer(
+		self,
+        previous_layer: "Neural_Layer"  # Layer to connect to.
+    ) -> None:
+        """Connects the current layer to its previous layer"""
 
     @abstractmethod
-    def Gradients_From_Activation(
-        self
-    ) -> np.ndarray:  # Matrix, with each column representing the gradient vector for each output of this layer
-        """Compute a matrix of Gradients, one on each column, from the previous input of this layer"""
+    def Update_From_Layer_Error(
+        self, 
+        layer_input: np.ndarray  # Matrix, with each column representing an error correction vector
+        , learning_rate : np.float64 # Learning rate. Bigger values mean higher rate
+    ) -> None:
+        """Update any hidden state within the layer based on the layer error"""
+        
+    @abstractmethod
+    def Produce_Backwards_Layer_Error(
+        self, 
+        layer_input: np.ndarray  # Matrix, with each column representing an gradient vector
+    ) -> np.ndarray: # Matrix, with each column representing an error correction vector
+        """Produce a layer error based on the fed layer error from the next layer"""
 
 # Base definition for a neural network
 class Neural_Network (metaclass=ABCMeta):
