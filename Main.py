@@ -20,6 +20,7 @@ xor_network.Add_Layer(output_layer)
 
 # Example usage:
 X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T
+print(f"X shape: {X.shape}")
 y = np.array([[0], [1], [1], [0]]).T
 
 print("Inputs with shape", X.shape)
