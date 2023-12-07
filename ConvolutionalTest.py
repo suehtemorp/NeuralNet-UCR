@@ -51,16 +51,23 @@ image2 = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 image2 = cv2.resize(image, (128, 128))  # Resize the image to match the model's input size
 image2 = image2.reshape((128, 128, 1))  # Add batch dimension and channel dimension
 
+# # Read and preprocess the image
+image_path = "./input/input3.png"
+image3 = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+image3 = cv2.resize(image, (128, 128))  # Resize the image to match the model's input size
+image3 = image3.reshape((128, 128, 1))  # Add batch dimension and channel dimension
+
+
 # Normalize pixel values to be between 0 and 1
-image2 = image2.astype(np.float64) / 255.0
+image3 = image3.astype(np.float64) / 255.0
 
 # X = np.array([image, image2])
-X = np.array([image, image2])
-Y = np.array([[1], [0]]).T
+X = np.array([image, image2, image3])
+Y = np.array([[1], [0], [0.5]]).T
 
 # Train the network
 print("Training time!")
-errors_per_epoch = model.Train(inputs=X, outputs=Y, learning_rate=0.25, epochs=21, epoch_report_rate=10, loss_floor=0.01)
+errors_per_epoch = model.Train(inputs=X, outputs=Y, learning_rate=0.25, epochs=3, epoch_report_rate=10, loss_floor=0.01)
 
 # Make predictions on the data set
 print("Prediction time!")

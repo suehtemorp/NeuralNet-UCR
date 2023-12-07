@@ -166,6 +166,8 @@ class Convolutional_Layer(Neural_Layer):
         mean_biases_correction *= -learning_rate
         weights_delta_filters *= -learning_rate
 
+        print("Mean:", np.mean(mean_biases_correction.squeeze()))
+        print("Filters:", weights_delta_filters)
         # Apply the deltas respectively
         self.biases += np.mean(mean_biases_correction.squeeze())
         self.filters += weights_delta_filters
