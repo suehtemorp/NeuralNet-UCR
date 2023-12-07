@@ -17,4 +17,10 @@ def relu(x, derivative=False):
     # Leaky ReLu, to bypass dead ReLus
     return np.diagflat(np.where(x > 0, 1, 0.01))
   else:
-    return np.where( x > 0, x, 0) 
+    return np.where( x > 0, x, 0)
+  
+def identity(x, derivative=False):
+  if derivative:
+    return np.ones_like(x)
+  else:
+    return x.reshape((x.shape[0], -1))

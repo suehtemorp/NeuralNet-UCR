@@ -28,9 +28,6 @@ class Convolutional_Layer(Neural_Layer):
 
         self.output_shape = (self.num_filters, input_shape[0] - filter_size + 1, input_shape[1] - filter_size + 1)
 
-        self.last_output = np.empty((0,) + self.output_shape)
-        self.last_preactivations = np.empty((0,) + self.output_shape)
-
         # Initialize filters and biases
         self.filters = np.random.uniform(low=-1, high=1, size=(num_filters, filter_size, filter_size, input_shape[2]))
         self.biases = np.random.uniform(low=-1, high=1, size=(num_filters, 1))
@@ -38,7 +35,8 @@ class Convolutional_Layer(Neural_Layer):
     def _apply_filter(self, input_slice, filter):
         return np.sum(input_slice * filter)
 
-    def _convolve(self, input_data):
+    def _convolve(self, input_data, *args):
+
         height, width, _ = self.input_shape
         output_height = height - self.filter_size + 1
         output_width = width - self.filter_size + 1
@@ -54,6 +52,8 @@ class Convolutional_Layer(Neural_Layer):
         return convolved_output
 
     def Predict(self, input: np.ndarray) -> np.ndarray:
+        self.last_output = np.empty((0,) + self.output_shape)
+        self.last_preactivations = np.empty((0,) + self.output_shape)
         for layer_input in input:
             if layer_input.shape != self.input_shape:
                 raise ValueError("Input shape does not match the expected input shape for the convolutional layer")
@@ -75,8 +75,7 @@ class Convolutional_Layer(Neural_Layer):
             self.last_output = np.append(self.last_output, last_output[np.newaxis, :], axis=0);
         # print(f"Output shape: {self.last_output.shape}")
         # print(f"Last Preactivations dim: {self.last_preactivations.shape}")
-        self.last_input = layer_input;
-        
+        self.last_input = input;
 
         return self.last_output
 
@@ -104,10 +103,9 @@ class Convolutional_Layer(Neural_Layer):
         self, 
         layer_input: np.ndarray  # Matrix, with each column representing an error correction vector
     ) -> np.ndarray: # Matrix, with each column representing an error correction vector
-        """Produce a layer error based on the fed layer error from the next layer"""
         # Assuming a simple gradient passing for now
 
-        # Compute the gradients for the pre-activations of this layer with respect to the activations of the previous layer 
+        # Compute the gradients for the pre-activations of this layer with respect to the activations of the next layer 
         preactivation_jacobian_at_layer = np.zeros_like(self.last_preactivations)
         for i in range(self.num_filters):
             for j in range(self.input_shape[0] - self.filter_size + 1):
@@ -127,39 +125,44 @@ class Convolutional_Layer(Neural_Layer):
         activation_jacobians_at_layer = np.multiply(preactivation_jacobian_at_layer, activation_jacobians[:, :, np.newaxis, np.newaxis])
 
         return activation_jacobians_at_layer
-    
+
     def Update_From_Layer_Error(
         self, 
-        layer_input: np.ndarray  # Matrix, with each column representing an gradient vector
-		, learning_rate : np.float64 # Learning rate. Bigger values mean higher rate
+        layer_input: np.ndarray,  # Matrix, with each column representing a gradient vector
+        learning_rate: np.float64  # Learning rate. Bigger values mean a higher rate
     ) -> None:
         """Update any hidden state within the layer based on the layer error"""
 
-        weights_delta : np.ndarray = Mean(
-				x = np.matmul(self.last_input, layer_input.T)
-				, axis=1
-				, get_derivative_instead=False
-				, keepdims=True
-			).T
+        # Compute the mean of the biases correction
+        mean_biases_correction = np.mean(layer_input, axis=(0, 2), keepdims=True)
 
-        biases_delta : np.ndarray = Mean(
-				x = layer_input
-				, axis=1
-				, get_derivative_instead=False
-				, keepdims=True
-			)
+        # Compute the weights correction for filters
+        weights_delta_filters = np.zeros_like(self.filters)
 
-		# Normalize the deltas and then scale them by the learning rate. 
-		# We desire to keep the direction of these deltas, but scale them by the learning rate 
-        if (np.linalg.norm(weights_delta, ord='fro') > 0):
-            weights_delta =  weights_delta / np.linalg.norm(weights_delta, ord='fro')
-		
-        if (np.linalg.norm(biases_delta, ord='fro') > 0):
-            biases_delta = biases_delta / np.linalg.norm(biases_delta, ord='fro')
+        for i in range(layer_input.shape[0]):  # Loop over the batch dimension
+            for j in range(self.num_filters):
+                temp_layer_input = layer_input[i, j][:, :, np.newaxis]
+                temp_last_input = self.last_input[i]
+                
+                # Define the amount of padding for each dimension
+                pad_width = ((1, 1), (1, 1), (0, 0))  # (before, after) for each dimension
 
-        weights_delta *= -learning_rate
-        biases_delta *= -learning_rate
-		
-		# Apply the deltas respectively
-        self.weights += weights_delta
-        self.biases += biases_delta
+                # Pad the matrix with zeros
+                padded_matrix = np.pad(temp_layer_input, pad_width, mode='constant', constant_values=0)
+                weights_delta_filters[j] += np.sum(temp_last_input * padded_matrix, axis=(0, 1))
+
+        weights_delta_filters /= layer_input.shape[0]
+
+        # Normalize the deltas and then scale them by the learning rate.
+        # We desire to keep the direction of these deltas but scale them by the learning rate
+        norm_factor = np.linalg.norm(weights_delta_filters)
+
+        if norm_factor > 0:
+            weights_delta_filters /= norm_factor
+
+        mean_biases_correction *= -learning_rate
+        weights_delta_filters *= -learning_rate
+
+        # Apply the deltas respectively
+        self.biases += np.mean(mean_biases_correction.squeeze())
+        self.filters += weights_delta_filters
