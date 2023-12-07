@@ -19,15 +19,17 @@ class Convolutional_Layer(Neural_Layer):
         num_filters: int,  # Number of filters in the layer
         filter_size: int,  # Size of each filter
         activation_function: typing.Callable[[float], float],  # Activation function
-        output_shape: typing.Tuple[int, int, int] # Shape of the output data
     ):
         super().__init__(output_dim=num_filters, input_dim=np.prod(input_shape), activation_function=activation_function)
         
         self.input_shape = input_shape
         self.num_filters = num_filters
         self.filter_size = filter_size
-        self.last_output = np.empty((0,) + output_shape)
-        self.last_preactivations = np.empty((0,) + output_shape)
+
+        self.output_shape = (self.num_filters, input_shape[0] - filter_size + 1, input_shape[1] - filter_size + 1)
+
+        self.last_output = np.empty((0,) + self.output_shape)
+        self.last_preactivations = np.empty((0,) + self.output_shape)
 
         # Initialize filters and biases
         self.filters = np.random.uniform(low=-1, high=1, size=(num_filters, filter_size, filter_size, input_shape[2]))
