@@ -19,12 +19,15 @@ class Convolutional_Layer(Neural_Layer):
         num_filters: int,  # Number of filters in the layer
         filter_size: int,  # Size of each filter
         activation_function: typing.Callable[[float], float],  # Activation function
+        output_shape: typing.Tuple[int, int, int] # Shape of the output data
     ):
         super().__init__(output_dim=num_filters, input_dim=np.prod(input_shape), activation_function=activation_function)
         
         self.input_shape = input_shape
         self.num_filters = num_filters
         self.filter_size = filter_size
+        self.last_output = np.empty((0,) + output_shape)
+        self.last_preactivations = np.empty((0,) + output_shape)
 
         # Initialize filters and biases
         self.filters = np.random.uniform(low=-1, high=1, size=(num_filters, filter_size, filter_size, input_shape[2]))
@@ -48,21 +51,30 @@ class Convolutional_Layer(Neural_Layer):
 
         return convolved_output
 
-    def Predict(self, layer_input: np.ndarray) -> np.ndarray:
-        if layer_input.shape != self.input_shape:
-            raise ValueError("Input shape does not match the expected input shape for the convolutional layer")
+    def Predict(self, input: np.ndarray) -> np.ndarray:
+        for layer_input in input:
+            if layer_input.shape != self.input_shape:
+                raise ValueError("Input shape does not match the expected input shape for the convolutional layer")
 
-        # Perform the convolution operation
-        convolved_output = self._convolve(layer_input)
+            # Perform the convolution operation
+            convolved_output = self._convolve(layer_input)
 
-        # Broadcast biases across the last two dimensions
-        biases_broadcasted = self.biases[:, :, np.newaxis]
+            # Broadcast biases across the last two dimensions
+            biases_broadcasted = self.biases[:, :, np.newaxis]
 
-        # Add biases to the convolved output
-        self.last_preactivations = convolved_output + biases_broadcasted
+            # Add biases to the convolved output
+            last_preactivations = convolved_output + biases_broadcasted
 
-        # Apply activation function
-        self.last_output = self.activation_function(self.last_preactivations)
+            # Apply activation function
+            last_output = self.activation_function(last_preactivations)
+            
+            # Append values to last_preactivations and last output.
+            self.last_preactivations = np.append(self.last_preactivations, last_preactivations[np.newaxis, :], axis=0)
+            self.last_output = np.append(self.last_output, last_output[np.newaxis, :], axis=0);
+        # print(f"Output shape: {self.last_output.shape}")
+        # print(f"Last Preactivations dim: {self.last_preactivations.shape}")
+        self.last_input = layer_input;
+        
 
         return self.last_output
 
