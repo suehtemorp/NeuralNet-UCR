@@ -2,7 +2,7 @@
 import numpy as np
 
 # Error funtion utilities
-from .ErrorFunctions import Mean, Squared_Error, Mean_Squared_Error
+from .ErrorFunctions import Mean_Squared_Error
 
 # Type hints
 import typing
@@ -27,8 +27,9 @@ class Sequential(Neural_Network):
 			raise Exception("Invalid layer type. Only Neural_Layer instances can be added.")
 		
 		# If there are previous layers, attempt to connect to them
-		if len(self.layers) > 0: 
-			self.layers[-1].Connect_Layer(next_layer)
+		if len(self.layers) > 0:
+			next_layer.Connect_To_Previous_Layer(self.layers[-1])
+			self.layers[-1].Connect_To_Next_Layer(next_layer)
 
 		# Append the layer to the list
 		self.layers.append(next_layer)
@@ -90,11 +91,8 @@ class Sequential(Neural_Network):
 		"""Readjust weights based on a subset of inputs and the corresponding outputs"""
 
 		# Keep track of the error correction per layer
-		layer_error_correction : np.ndarray = np.ndarray
-
-		# And of the deltas to apply
-		weights_deltas : list = list()
-		biases_deltas : list = list()
+		current_layer_error : np.ndarray = np.ndarray
+		layer_error_per_layer : list = list()
 
 		# Propagate the error correction backward through the network and compute
 		# the deltas respectively
@@ -127,48 +125,21 @@ class Sequential(Neural_Network):
 
 				# The last layer deltas is exactly the same as the gradients from the preactivations to the cost function, 
 				# computed as the product element-wise between these other set of gradients
-				layer_error_correction = np.multiply(preactivations_to_activations_gradients, activations_to_cost_gradients)
+				current_layer_error = np.multiply(preactivations_to_activations_gradients, activations_to_cost_gradients)
 
 			# The error correction of previous layers is influenced by those of the next layers
 			else:
 				# For hidden layers, use the error correction from the next layer
 				next_layer : Neural_Layer = self.layers[i+1]
-				layer_error_correction = next_layer.Gradients_From_Activation(layer_error_correction, layer)
-
-			weights_delta : np.ndarray = Mean(
-				x = np.matmul(layer.last_input, layer_error_correction.T)
-				, axis=1
-				, get_derivative_instead=False
-				, keepdims=True
-			).T
-
-			biases_delta : np.ndarray = Mean(
-				x = layer_error_correction
-				, axis=1
-				, get_derivative_instead=False
-				, keepdims=True
-			)
-
-			# Normalize the deltas and then scale them by the learning rate. 
-			# We desire to keep the direction of these deltas, but scale them by the learning rate 
-			if (np.linalg.norm(weights_delta, ord='fro') > 0):
-				weights_delta =  weights_delta / np.linalg.norm(weights_delta, ord='fro')
-			
-			if (np.linalg.norm(biases_delta, ord='fro') > 0):
-				biases_delta = biases_delta / np.linalg.norm(biases_delta, ord='fro')
-
-			weights_delta *= -learning_rate
-			biases_delta *= -learning_rate
+				current_layer_error = next_layer.Produce_Backwards_Layer_Error(current_layer_error)
 
 			# Store but don't apply just yet the adjustment for each weight and bias
 			# This will ensure application of deltas don't muddy the calculations for other deltas
-			weights_deltas.insert(0, weights_delta)
-			biases_deltas.insert(0, biases_delta)
+			layer_error_per_layer.insert(0, current_layer_error)
 
 		# Apply the deltas for each layer
-		for (layer, weights_delta, biases_delta) in zip(self.layers, weights_deltas, biases_deltas):
-			layer.weights += weights_delta
-			layer.biases += biases_delta
+		for (layer, layer_error) in zip(self.layers, layer_error_per_layer):
+			layer.Update_From_Layer_Error(layer_input=layer_error, learning_rate=learning_rate)
 
 	def Cost_Overall(
 		computed_outputs : np.ndarray # Matrix, with each column representing an output vector
