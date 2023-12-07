@@ -40,6 +40,10 @@ class Max_Pooling_Layer(Neural_Layer):
 		if np.sum(np.mod(input_shape, output_shape)) != 0:
 			raise ValueError("Input shape does not subdivide output shape in the pooling layer")
         
+		# Compute the block size
+		self.block_size : tuple =  tuple(np.floor_divide(self.input_shape, self.output_shape))
+		# print("Block size", self.block_size)
+
         # Weights and biases for this layer are nil
 		self.weights : np.ndarray = None
 		self.biases : np.ndarray = None
@@ -63,36 +67,36 @@ class Max_Pooling_Layer(Neural_Layer):
 		for input in batch_inputs:
 			# Reshape the batch input
 			current_input : np.ndarray = np.array(input).reshape(self.input_shape)
-			print("Current input reshaped", current_input)
+			# print("Current input reshaped", current_input)
 
 			# Subdivide the input into blocks
 			input_as_blocks = view_as_blocks(arr_in=current_input, block_shape=self.output_shape)
-			print("Input as block", input_as_blocks)
+			# print("Input as block", input_as_blocks)
 
 			# Compute the output mask and save it
 			output_mask = np.max(input_as_blocks, axis=self.pooling_axes, keepdims=True) == input_as_blocks
 			self.batch_output_masks.append(output_mask)
-			print("Output mask", output_mask)
+			# print("Output mask", output_mask)
 
 			# Compute the pre-activations as a blockwise, max-pooling reduction
-			preactivation : np.ndarray = block_reduce(current_input, self.output_shape, np.max)
-			print("Block preactivation", preactivation)
+			preactivation : np.ndarray = block_reduce(current_input, block_size=self.block_size, func=np.max)
+			# print("Block preactivation", preactivation)
 
 			# Flatten it, compute the activation, and save those
 			preactivation = preactivation.flatten()
 			preactivations.append(preactivation)
-			print("Flatenned preactivation", preactivation)
+			# print("Flatenned preactivation", preactivation)
 			
 			activation = self.activation_function(preactivation, False)
 			activations.append(activation)
-			print("Flatenned activation", activation)
+			# print("Flatenned activation", activation)
 
 		# Join the outputs into a proper matrix
-		self.last_preactivations = np.concatenate(preactivations, axis=0).T
-		self.last_output = np.concatenate(activations, axis=0).T
+		self.last_preactivations = np.stack(preactivations).T
+		self.last_output = np.stack(activations).T
 
-		print("Final preactivations", self.last_preactivations)
-		print("Final outputs", self.last_output)
+		# print("Final preactivations", self.last_preactivations, "with shape", self.last_preactivations.shape)
+		# print("Final outputs", self.last_output, "with shape", self.last_output.shape)
 
 		# All is done
 		return self.last_output
@@ -136,29 +140,25 @@ class Max_Pooling_Layer(Neural_Layer):
 		for (input_error, input_mask) in zip(layer_input.T, self.batch_output_masks):
 			# Turn the layer mask into a binary matrix
 			binary_mask : np.ndarray = input_mask.astype(np.int32).reshape(self.input_shape)
-			print("Binary mask", binary_mask, "with shape", binary_mask.shape)
+			# print("Binary mask", binary_mask, "with shape", binary_mask.shape)
 
 			# Tile the error components onto the same shape of the binary mask
-			input_output_ratio = np.array(np.floor_divide(self.input_shape, self.output_shape))
-			print("Input to output ratio", input_output_ratio, "with shape", input_output_ratio.shape)
-
-			input_error = input_error.reshape(self.output_shape)
-			input_error = np.kron(input_error, np.ones(input_output_ratio)) 
-			print("Matching components in error", input_error, "with shape", input_error.shape)
+			tiled_error = input_error.reshape(self.output_shape)
+			tiled_error = np.kron(tiled_error, np.ones(self.block_size)) 
+			# print("Matching components in error", tiled_error, "with shape", tiled_error.shape)
 			
 			# Multiply them both element-wise, then flatten. This is the new layer error
-			new_error = input_error * binary_mask
-			print("New error before flatenning", new_error, "with shape", new_error.shape)
-			new_error = new_error.flatten()
-			print("New error after flatenning", new_error, "with shape", new_error.shape)
+			new_error = tiled_error * binary_mask
+			# print("New error before flatenning", new_error, "with shape", new_error.shape)
+			new_error : np.ndarray = new_error.flatten()
+			# print("New error after flatenning", new_error, "with shape", new_error.shape)
 
-			return new_error
+			# Save it
+			output_errors.append(new_error)
 		
-		
-
-
-
-
+		# Merge the layer errors onto a matrix
+		output_error : np.ndarray = np.stack(output_errors).T
+		# print("Output error", output_error, "with shape", output_error.shape)
 
 		# All is done
-		return 
+		return output_error

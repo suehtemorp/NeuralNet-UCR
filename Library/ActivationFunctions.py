@@ -4,7 +4,7 @@ def identity(x, derivative=False):
   if (derivative):
     return np.eye(N=np.prod(x.shape))
   else:
-    return x,
+    return x
 
 def sigmoid(x, derivative=False):
   if derivative:
