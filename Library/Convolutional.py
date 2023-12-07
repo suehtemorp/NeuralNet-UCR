@@ -36,9 +36,6 @@ class Convolutional_Layer(Neural_Layer):
         return np.sum(input_slice * filter)
 
     def _convolve(self, input_data, *args):
-        if input_data.ndim == 1:
-            # If input is 1D, reshape it to 3D
-            input_data = input_data.reshape((self.input_shape[0], self.input_shape[1], self.input_shape[2]))
 
         height, width, _ = self.input_shape
         output_height = height - self.filter_size + 1
@@ -166,8 +163,6 @@ class Convolutional_Layer(Neural_Layer):
         mean_biases_correction *= -learning_rate
         weights_delta_filters *= -learning_rate
 
-        print("Mean:", np.mean(mean_biases_correction.squeeze()))
-        print("Filters:", weights_delta_filters)
         # Apply the deltas respectively
         self.biases += np.mean(mean_biases_correction.squeeze())
         self.filters += weights_delta_filters
