@@ -1,5 +1,11 @@
 import numpy as np
 
+def identity(x, derivative=False):
+  if (derivative):
+    return np.eye(N=np.prod(x.shape))
+  else:
+    return x,
+
 def sigmoid(x, derivative=False):
   if derivative:
     return np.diagflat(np.multiply(sigmoid(x), 1-sigmoid(x)))
